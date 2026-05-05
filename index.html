@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>Ocena nieprzewidywalności projektu</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    margin: 0;
+    padding: 30px 20px;
+    background: #f0f2f5;
+    color: #1a1a2e;
+  }
+
+  .container {
+    max-width: 980px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+    padding: 40px 48px 48px;
+  }
+
+  h1 { font-size: 1.8rem; margin-bottom: 4px; color: #1a1a2e; }
+  .subtitle { color: #666; margin-bottom: 36px; font-size: 0.97rem; }
+
+  .section {
+    margin-bottom: 36px;
+    border: 1px solid #e2e6ea;
+    border-radius: 10px;
+    overflow: visible;
+  }
+
+  .section-header {
+    background: #1a1a2e;
+    color: #fff;
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-radius: 10px 10px 0 0;
+  }
+
+  .section-header .icon { font-size: 1.2rem; }
+  .section-header h2 { margin: 0; font-size: 1.05rem; font-weight: 600; }
+
+  .section-body { padding: 0 20px; }
+
+  .question {
+    padding: 18px 0;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .question:last-child { border-bottom: none; }
+
+  .question-label-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  .question-label {
+    font-weight: 600;
+    font-size: 0.97rem;
+    color: #1a1a2e;
+  }
+
+  .question-context {
+    font-size: 0.84rem;
+    color: #666;
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
+
+  /* Tooltip */
+  .tooltip-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .tooltip-btn {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #e2e6ea;
+    color: #555;
+    border: none;
+    cursor: pointer;
+    font-size: 0.72rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s;
+    line-height: 1;
+    padding: 0;
+  }
+
+  .tooltip-btn:hover { background: #4a6fa5; color: #fff; }
+
+  .tooltip-box {
+    display: none;
+    position: absolute;
+    left: 26px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #1a1a2e;
+    color: #eee;
+    font-size: 0.78rem;
+    line-height: 1.55;
+    padding: 10px 14px;
+    border-radius: 8px;
+    width: 300px;
+    z-index: 100;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.22);
+    pointer-events: none;
+  }
+
+  .tooltip-box::before {
+    content: '';
+    position: absolute;
+    left: -6px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: 6px solid transparent;
+    border-right-color: #1a1a2e;
+    border-left: none;
+  }
+
+  .tooltip-wrap:hover .tooltip-box,
+  .tooltip-btn:focus + .tooltip-box {
+    display: block;
+  }
+
+  /* Options */
+  .options {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .options label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 14px;
+    border: 1.5px solid #d0d5dd;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.15s;
+    background: #fff;
+    color: #444;
+    user-select: none;
+  }
+
+  .options input[type="radio"] { display: none; }
+  .options label:hover { border-color: #4a6fa5; background: #f0f4fb; color: #1a1a2e; }
+
+  .options label.selected-5 { background: #d4edda; border-color: #28a745; color: #155724; font-weight: 600; }
+  .options label.selected-4 { background: #d6eaf8; border-color: #2980b9; color: #1a5276; font-weight: 600; }
+  .options label.selected-3 { background: #fef9e7; border-color: #f0ad4e; color: #7d5c00; font-weight: 600; }
+  .options label.selected-2 { background: #fde8cc; border-color: #e67e22; color: #784212; font-weight: 600; }
+  .options label.selected-1 { background: #fddede; border-color: #e74c3c; color: #7b241c; font-weight: 600; }
+
+  /* Notes */
+  .notes-section { margin-bottom: 36px; }
+  .notes-section label { font-weight: 600; display: block; margin-bottom: 8px; }
+
+  textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1.5px solid #d0d5dd;
+    border-radius: 8px;
+    font-size: 0.92rem;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 80px;
+    color: #333;
+    transition: border-color 0.15s;
+  }
+  textarea:focus { outline: none; border-color: #4a6fa5; }
+
+  .btn-calculate {
+    display: inline-block;
+    padding: 13px 36px;
+    background: #1a1a2e;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.18s;
+  }
+  .btn-calculate:hover { background: #2c2c54; }
+
+  /* ── RESULT ── */
+  #result { display: none; margin-top: 40px; }
+
+  .result-header {
+    border-radius: 10px;
+    padding: 24px 28px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .result-header.level-low    { background: #d4edda; border-left: 6px solid #28a745; }
+  .result-header.level-medium { background: #d6eaf8; border-left: 6px solid #2980b9; }
+  .result-header.level-high   { background: #fde8cc; border-left: 6px solid #e67e22; }
+  .result-header.level-vhigh  { background: #fddede; border-left: 6px solid #e74c3c; }
+
+  .result-header .badge { font-size: 2.2rem; line-height: 1; }
+  .result-header .label-text h2 { margin: 0 0 4px; font-size: 1.25rem; }
+  .result-header .label-text p  { margin: 0; font-size: 0.9rem; color: #444; }
+
+  .result-header .score-box {
+    margin-left: auto;
+    text-align: center;
+    background: rgba(255,255,255,0.6);
+    border-radius: 8px;
+    padding: 10px 20px;
+  }
+  .score-box .score-num   { font-size: 2rem; font-weight: 700; line-height: 1; }
+  .score-box .score-label { font-size: 0.75rem; color: #555; margin-top: 2px; }
+
+  /* Area bars */
+  .area-bars {
+    margin-bottom: 28px;
+    border: 1px solid #e2e6ea;
+    border-radius: 10px;
+    padding: 20px 24px;
+  }
+  .area-bars h3 { margin: 0 0 16px; font-size: 1rem; color: #1a1a2e; }
+
+  .bar-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 11px;
+    font-size: 0.86rem;
+  }
+  .bar-label { width: 200px; flex-shrink: 0; color: #444; }
+  .bar-track { flex: 1; background: #eee; border-radius: 6px; height: 14px; overflow: hidden; }
+  .bar-fill  { height: 100%; border-radius: 6px; transition: width 0.6s ease; }
+  .bar-val   { width: 36px; text-align: right; font-weight: 600; color: #333; }
+
+  /* Risk table */
+  .risk-table-wrap {
+    border: 1px solid #e2e6ea;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+  .risk-table-wrap h3 {
+    margin: 0;
+    padding: 14px 20px;
+    background: #1a1a2e;
+    color: #fff;
+    font-size: 1rem;
+  }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+  thead tr { background: #f7f8fa; }
+  th { padding: 10px 14px; text-align: left; font-weight: 600; color: #555; border-bottom: 1px solid #e2e6ea; }
+  td { padding: 12px 14px; border-bottom: 1px solid #f0f0f0; vertical-align: top; line-height: 1.5; }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: #fafbfc; }
+
+  /* Impact badges – 3 types */
+  .impact-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .impact-blocks  { background: #fddede; color: #c0392b; }   /* Blokuje projekt   */
+  .impact-result  { background: #fde8cc; color: #a04000; }   /* Psuje rezultat    */
+  .impact-delay   { background: #fef9e7; color: #7d5c00; }   /* Przesuwa termin   */
+
+  .no-risks {
+    padding: 20px;
+    text-align: center;
+    color: #28a745;
+    font-weight: 600;
+  }
+
+  .unanswered-warn {
+    background: #fff3cd;
+    border: 1px solid #f0ad4e;
+    border-radius: 8px;
+    padding: 10px 16px;
+    font-size: 0.88rem;
+    margin-bottom: 20px;
+    color: #7d5c00;
+  }
+
+  @media (max-width: 640px) {
+    .container { padding: 24px 16px; }
+    .options label { font-size: 0.78rem; padding: 6px 10px; }
+    .result-header .score-box { margin-left: 0; }
+    .bar-label { width: 120px; font-size: 0.78rem; }
+    .tooltip-box { width: 220px; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <h1>🔍 Ocena nieprzewidywalności projektu</h1>
+  <p class="subtitle">Wypełnij formularz, aby otrzymać ocenę poziomu ryzyka i rejestr zagrożeń gotowy do karty projektu.</p>
+
+  <form id="form">
+
+    <!-- ── ZAKRES I WYMAGANIA ── -->
+    <div class="section">
+      <div class="section-header">
+        <span class="icon">📋</span>
+        <h2>Zakres i wymagania</h2>
+      </div>
+      <div class="section-body">
+
+        <div class="question" data-area="requirements">
+          <div class="question-label-row">
+            <span class="question-label">Wymagania są jasno określone i zatwierdzone</span>
+            <div class="tooltip-wrap">
+              <button type="button" class="tooltip-btn" tabindex="0">?</button>
+              <div class="tooltip-box">Czy interesariusze podpisali się pod zakresem? Czy nie ma obszarów „do ustalenia" które mogą zmienić zakres w trakcie?</div>
+            </div>
+          </div>
+          <div class="question-context">Wiesz co ma powstać i klient to potwierdził na piśmie.</div>
+          <div class="options">
+            <label><input type="radio" name="q1" value="5"><span>✅ Tak, zakres jest zamknięty</span></label>
+            <label><input type="radio" name="q1" value="4"><span>🟦 Prawie – zostały drobne szczegóły</span></label>
+            <label><input type="radio" name="q1" value="3"><span>❔ Trudno ocenić</span></label>
+            <label><input type="radio" name="q1" value="2"><span>🟧 Są znaczące luki do wyjaśnienia</span></label>
+            <label><input type="radio" name="q1" value="1"><span>❌ Wymagania są płynne lub nie istnieją</span></label>
+          </div>
+        </div>
+
+        <div class="question" data-area="requirements">
+          <div class="question-label-row">
+            <span class="question-label">Zmiany zakresu przechodzą przez formalną akceptację</span>
+            <div class="tooltip-wrap">
+              <button type="button" class="tooltip-btn" tabindex="0">?</button>
+              <div class="tooltip-box">Czy każda zmiana zakresu jest analizowana pod kątem wpływu na termin i budżet, a dopiero potem akceptowana przez sponsora?</div>
+            </div>
+          </div>
+          <div class="question-context">Nikt nie dorzuca zadań „przy okazji" bez konsekwencji dla harmonogramu.</div>
+          <div class="options">
+            <label><input type="radio" name="q2" value="5"><span>✅ Tak, mamy działający change management</span></label>
+            <label><input type="radio" name="q2" value="4"><span>🟦 Prawie – proces jest, bywa omijany</span></label>
+            <label><input type="radio" name="q2" value="3"><span>❔ Trudno ocenić</span></label>
+            <label><input type="radio" name="q2" value="2"><span>🟧 Zmiany wchodzą bez analizy wpływu</span></label>
+            <label><input type="radio" name="q2" value="1"><span>❌ Brak jakiegokolwiek procesu kontroli zmian</span></label>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── TECHNOLOGIA ── -->
+    <div class="section">
+      <div class="section-header">
+        <span class="icon">⚙️</span>
+        <h2>Technologia</h2>
+      </div>
+      <div class="section-body">
+
+        <div class="question" data-area="tech">
+          <div class="question-label-row">
+            <span class="question-label">Zespół zna używane technologie z poprzednich projektów</span>
+            <div class="tooltip-wrap">
+              <button type="button" class="tooltip-btn" tabindex="0">?</button>
+              <div class="tooltip-box">Chodzi o praktyczne doświadczenie – frameworki, bazy danych, platformy chmurowe. Nie wystarczy że ktoś widział tutorial.</div>
+            </div>
+          </div>
+          <div class="question-context">Nikt nie uczy się kluczowej technologii dopiero w trakcie projektu.</div>
+          <div class="options">
+            <label><input type="radio" name="q3" value="5"><span>✅ Tak, znamy stos z wcześniejszych projektów</span></label>
+            <label><input type="radio" name="q3" value="4"><span>🟦 Prawie – 1–2 elementy są nowe, reszta znana</span></label>
+            <label><input type="radio" name="q3" value="3"><span>❔ Trudno ocenić</span></label>
+            <label><input type="radio" name="q3" value="2"><span>🟧 Znaczna część technologii jest dla nas nowa</span></label>
+            <label><input type="radio" name="q3" value="1"><span>❌ Nie znamy wybranych technologii</span></label>
+          </div>
+        </div>
+
+        <div class="question" data-area="tech">
+          <div class="question-label-row">
+            <span class="question-label">Wiemy że rozwiązanie zadziała – nie musimy tego sprawdzać</span>
+            <div class="tooltip-wrap">
+              <button type="button" class="tooltip-btn" tabindex="0">?</button>
+              <div class="tooltip-box">Czy są obszary gdzie nie wiadomo czy dane podejście techniczne w ogóle jest wykonalne? Np. nieznane ograniczenia API, niesprawdzone integracje.</div>
+            </div>
+          </div>
+          <div class="question-context">Architektura jest zweryfikowana – nie budujemy na nieznanych założeniach.</div>
+          <div class="options">
+            <label><input type="radio" name="q4" value="5"><span>✅ Tak, podejście jest sprawdzone</span></label>
+            <label><input type="radio" name="q4" value="4"><span>🟦 Prawie – drobne obszary do szybkiej weryfikacji</span></label>
+            <label><input type="radio" name="q4" value="3"><span>❔ Trudno ocenić</span></label>
+            <label><input type="radio" name="q4" value="2"><span>🟧 Kilka istotnych obszarów niezweryfikowanych</span></label>
+            <label><input type="radio" name="q4" value="1"><span>❌ Kluczowe elementy są całkowicie niezbadane</span></label>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── ZALEŻNOŚCI ── -->
+    <div class="section">
+      <div class="section-header">
+        <span class="icon">🔗</span>
+        <h2>Zależności zewnętrzne</h2>
+      </div>
+      <div class="section-body">
+
+        <div class="question" data-area="deps">
+          <div class="question-label-row">
+            <span class="question-label">Projekt nie jest blokowany przez zewnętrznych dostawców</span>
+            <div class="tooltip-wrap">
+              <button type="button" class="tooltip-btn" tabindex="0">?</button>
+              <div class="tooltip-box">Zewnętrzni dostawcy to: firmy trzecie, systemy legacy innej organizacji, API zewnętrzne, regulator. Jeśli są – czy masz SLA i kogoś do eskalacji?</div>
+            </div>
+          </div>
+          <div class="question-context">Jeśli ktoś zewnętrzny nie dostarczy – projekt nie stanie.</div>
+          <div class="options">
+            <label><input type="radio" name="q5" value="5"><span>✅ Tak, brak krytycznych zależności zewnętrznych</span></label>
+            <label><input type="radio" name="q5" value="4"><span>🟦 Są zależności, ale objęte SLA i regularnym kontaktem</span></label>
+            <label><input type="radio" name="q5" value="3"><span>❔ Trudno ocenić</span></label>
+            <label><input type="radio" name="q5" value="2"><span>🟧 Są krytyczne zależności bez żadnych gwarancji</span></label>
+            <label><input type="radio" name="q5" value="1"><span>❌ Projekt silnie zależny od niekontrolowanych stron trzecich</span></label>
+          </div>
+        </div>
+
+        <div class="question" data-area="deps">
+          <div class="question-label-row">
+            <span class="question-label">Współpraca z innymi zespołami przebiega bez zaskoczeń</span>
+            <div class="tooltip-wrap">
+              <button type="button" class="tooltip-btn" tabindex="0">?</button>
+              <div class="tooltip-box">Czy inne zespoły traktują wasze potrzeby priorytetowo? Czy macie zdefiniowane punkty styku (np. kontrakty API, regularne synce)?</div>
+            </div>
+          </div>
+          <div class="question-context">Inne zespoły nie blokują waszej pracy przez brak odpowiedzi lub zmianę priorytetów.</div>
+          <div class="options">
+            <label><input type="radio" name="q6" value="5"><span>✅ Tak, współpraca jest przewidywalna i ustrukturyzowana</span></label>
+            <label><input type="radio" name="q6" value="4"><span>🟦 Drobne tarcia, ale nic co nas blokuje</span></label>
+            <label><input type="radio" name="q6" value="3"><span>❔ Trudno ocenić</span></label>
+            <label><input type="radio" name="q6" value="2"><span>🟧 Częste opóźnienia lub niejasne granice odpowiedzialności</span></label>
+            <label><input type="radio" name="q6" value="1"><span>❌ Chaotyczna współpraca, nie wiemy na kogo możemy liczyć</span></label>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── ZESPÓŁ ── -->
+    <div class="section">
+      <div class="section-header">
+        <span class="icon">👥</span>
+        <h2>Zespół</h2>
+      </div>
+      <div class="section-body">
+
+        <div class="question" data-area="team">
+          <div class="question-label-row">
+            <span class="question-label">Zespół robił już podobne projekty</span>
+            <div class="tooltip-wrap">
+              <button type="button" class="tooltip-btn" tabindex="0">?</button>
+              <div class="tooltip-box">Chodzi o podobną skalę, złożoność i domenę. Lider, architekt i kluczowi developerzy – nie tylko jedna osoba w zespole.</div>
+            </div>
+          </div>
+          <div class="question-context">Macie punkt odniesienia – wiecie czego się spodziewać i gdzie zwykle pojawiają się problemy.</div>
+          <div class="options">
+            <label><input type="radio" name="q7" value="5"><span>✅ Tak, mamy doświadczenie z podobnymi projektami</span></label>
+            <label><input type="radio" name="q7" value="4"><span>🟦 Prawie – większość zespołu ma odpowiedni background</span></label>
+            <label><input type="radio" name="q7" value="3"><span>❔ Trudno ocenić</span></label>
+            <label><input type="radio" name="q7" value="2"><span>🟧 Tylko 1–2 osoby mają doświadczenie w tym typie projektu</span></label>
+            <label><input type="radio" name="q7" value="1"><span>❌ Zespół nie robił podobnych projektów</span></label>
+          </div>
+        </div>
+
+        <div class="question" data-area="team">
+          <div class="question-label-row">
+            <span class="question-label">Skład zespołu nie zmieni się znacząco w trakcie projektu</span>
+            <div class="tooltip-wrap">
+              <button type="button" class="tooltip-btn" tabindex="0">?</button>
+              <div class="tooltip-box">Bus factor – czy gdyby jedna kluczowa osoba odeszła jutro, projekt by stanął? Czy wiedza jest rozłożona na kilka osób?</div>
+            </div>
+          </div>
+          <div class="question-context">Nie planujecie rotacji kluczowych osób i wiedza nie leży tylko u jednej osoby.</div>
+          <div class="options">
+            <label><input type="radio" name="q8" value="5"><span>✅ Tak, zespół jest stabilny i wiedza jest współdzielona</span></label>
+            <label><input type="radio" name="q8" value="4"><span>🟦 Planowane zmiany mają zaplanowane przekazanie wiedzy</span></label>
+            <label><input type="radio" name="q8" value="3"><span>❔ Trudno ocenić</span></label>
+            <label><input type="radio" name="q8" value="2"><span>🟧 Prawdopodobna rotacja kluczowych osób</span></label>
+            <label><input type="radio" name="q8" value="1"><span>❌ Wysokie ryzyko odejść, wiedza u jednej osoby</span></label>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── PLANOWANIE ── -->
+    <div class="section">
+      <div class="section-header">
+        <span class="icon">📅</span>
+        <h2>Planowanie i estymacje</h2>
+      </div>
+      <div class="section-body">
+
+        <div class="question" data-area="planning">
+          <div class="question-label-row">
+            <span class="question-label">Terminy wynikają z estymacji, nie zostały narzucone z góry</span>
+            <div class="tooltip-wrap">
+              <button type="button" class="tooltip-btn" tabindex="0">?</button>
+              <div class="tooltip-box">Czy harmonogram powstał na podstawie realnej analizy zakresu i zasobów, czy data końcowa była znana zanim ktokolwiek policzył ile pracy to wymaga?</div>
+            </div>
+          </div>
+          <div class="question-context">Termin oddania ma podstawę w obliczeniach, a nie w życzeniu sponsora.</div>
+          <div class="options">
+            <label><input type="radio" name="q9" value="5"><span>✅ Tak, terminy wynikają z estymacji zespołu</span></label>
+            <label><input type="radio" name="q9" value="4"><span>🟦 Głównie tak – drobne narzucone ograniczenia, ale realne</span></label>
+            <label><input type="radio" name="q9" value="3"><span>❔ Trudno ocenić</span></label>
+            <label><input type="radio" name="q9" value="2"><span>🟧 Termin narzucony, zespół stara się go uzasadnić</span></label>
+            <label><input type="radio" name="q9" value="1"><span>❌ Deadline narzucony odgórnie, nikt nie sprawdził wykonalności</span></label>
+          </div>
+        </div>
+
+        <div class="question" data-area="planning">
+          <div class="question-label-row">
+            <span class="question-label">Plan ma zapas na nieprzewidziane sytuacje</span>
+            <div class="tooltip-wrap">
+              <button type="button" class="tooltip-btn" tabindex="0">?</button>
+              <div class="tooltip-box">Realistyczny plan zakłada że ludzie mają urlopy, spotkania i niespodzianki. Minimum 10–15% czasu jako bufor to dobra praktyka.</div>
+            </div>
+          </div>
+          <div class="question-context">Harmonogram nie zakłada że każdy pracuje na 100% przez cały czas i nic się nie wydarzy.</div>
+          <div class="options">
+            <label><input type="radio" name="q10" value="5"><span>✅ Tak, mamy bufory i realistyczne założenia</span></label>
+            <label><input type="radio" name="q10" value="4"><span>🟦 Bufory są, ale niewystarczające na gorszy scenariusz</span></label>
+            <label><input type="radio" name="q10" value="3"><span>❔ Trudno ocenić</span></label>
+            <label><input type="radio" name="q10" value="2"><span>🟧 Plan napięty, nie ma miejsca na żadne problemy</span></label>
+            <label><input type="radio" name="q10" value="1"><span>❌ Plan nierealistyczny, terminy niemożliwe do dotrzymania</span></label>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── RYZYKO ── -->
+    <div class="section">
+      <div class="section-header">
+        <span class="icon">⚠️</span>
+        <h2>Zarządzanie ryzykiem</h2>
+      </div>
+      <div class="section-body">
+
+        <div class="question" data-area="risk">
+          <div class="question-label-row">
+            <span class="question-label">Ryzyka projektu są spisane i ktoś za nie odpowiada</span>
+            <div class="tooltip-wrap">
+              <button type="button" class="tooltip-btn" tabindex="0">?</button>
+              <div class="tooltip-box">Każde ryzyko powinno mieć właściciela (konkretną osobę, nie „zespół") i być przeglądane regularnie – np. co sprint.</div>
+            </div>
+          </div>
+          <div class="question-context">Masz listę rzeczy które mogą pójść nie tak i konkretne osoby które ich pilnują.</div>
+          <div class="options">
+            <label><input type="radio" name="q11" value="5"><span>✅ Tak, rejestr ryzyk jest aktualny i ma ownerów</span></label>
+            <label><input type="radio" name="q11" value="4"><span>🟦 Rejestr jest, ale wymaga częstszych przeglądów</span></label>
+            <label><input type="radio" name="q11" value="3"><span>❔ Trudno ocenić</span></label>
+            <label><input type="radio" name="q11" value="2"><span>🟧 Ryzyka omawiane ad hoc, nic nie jest spisane</span></label>
+            <label><input type="radio" name="q11" value="1"><span>❌ Brak jakiegokolwiek zarządzania ryzykiem</span></label>
+          </div>
+        </div>
+
+        <div class="question" data-area="risk">
+          <div class="question-label-row">
+            <span class="question-label">Wiemy co zrobimy jeśli kluczowe ryzyko się zmaterializuje</span>
+            <div class="tooltip-wrap">
+              <button type="button" class="tooltip-btn" tabindex="0">?</button>
+              <div class="tooltip-box">Plan odpowiedzi to nie „postaramy się rozwiązać problem". To konkretne działania, osoby odpowiedzialne i próg kiedy eskalujemy do sponsora.</div>
+            </div>
+          </div>
+          <div class="question-context">Dla najpoważniejszych ryzyk masz plan B – nie improwizujesz gdy coś się posypie.</div>
+          <div class="options">
+            <label><input type="radio" name="q12" value="5"><span>✅ Tak, mamy plany odpowiedzi dla kluczowych ryzyk</span></label>
+            <label><input type="radio" name="q12" value="4"><span>🟦 Są dla większości, brakuje dla kilku</span></label>
+            <label><input type="radio" name="q12" value="3"><span>❔ Trudno ocenić</span></label>
+            <label><input type="radio" name="q12" value="2"><span>🟧 Brak planów dla istotnej części ryzyk</span></label>
+            <label><input type="radio" name="q12" value="1"><span>❌ Nie mamy planów – reagujemy gdy problem już jest</span></label>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── UWAGI ── -->
+    <div class="notes-section">
+      <label for="notes">💬 Dodatkowe uwagi</label>
+      <textarea id="notes" placeholder="Opisz największe źródła niepewności lub dodatkowy kontekst projektu…"></textarea>
+    </div>
+
+    <button type="button" class="btn-calculate" onclick="calculate()">▶ Oblicz ocenę nieprzewidywalności</button>
+
+  </form>
+
+  <div id="result"></div>
+
+</div>
+
+<script>
+  document.querySelectorAll('.options input[type="radio"]').forEach(radio => {
+    radio.addEventListener('change', function () {
+      const group = this.closest('.options');
+      group.querySelectorAll('label').forEach(l => l.className = '');
+      this.closest('label').classList.add('selected-' + this.value);
+    });
+  });
+
+  const AREA_LABELS = {
+    requirements: 'Zakres i wymagania',
+    tech:         'Technologia',
+    deps:         'Zależności zewnętrzne',
+    team:         'Zespół',
+    planning:     'Planowanie i estymacje',
+    risk:         'Zarządzanie ryzykiem'
+  };
+
+  const AREA_ICONS = {
+    requirements: '📋',
+    tech:         '⚙️',
+    deps:         '🔗',
+    team:         '👥',
+    planning:     '📅',
+    risk:         '⚠️'
+  };
+
+  // impact: 'blocks' | 'result' | 'delay'
+  const IMPACT_LABEL = {
+    blocks: 'Blokuje projekt',
+    result: 'Psuje rezultat',
+    delay:  'Przesuwa termin'
+  };
+
+  const IMPACT_CLASS = {
+    blocks: 'impact-blocks',
+    result: 'impact-result',
+    delay:  'impact-delay'
+  };
+
+  function getImpact(area, areaAvg, criticalAreas) {
+    const isCritical = criticalAreas.includes(area);
+    const map = {
+      requirements: isCritical ? 'blocks' : 'result',
+      tech:         isCritical ? 'blocks' : 'result',
+      deps:         isCritical ? 'blocks' : 'delay',
+      team:         isCritical ? 'result' : 'delay',
+      planning:     isCritical ? 'blocks' : 'delay',
+      risk:         isCritical ? 'blocks' : 'result'
+    };
+    return map[area];
+  }
+
+  const RISK_DATA = {
+    requirements: {
+      title:      'Niekontrolowane rozszerzanie zakresu (scope creep)',
+      mitigation: 'Wprowadź obowiązkową analizę wpływu przed każdą zmianą zakresu. Sponsor zatwierdza zmiany na piśmie, a harmonogram jest aktualizowany przy każdej akceptacji.'
+    },
+    tech: {
+      title:      'Ryzyko technologiczne – rozwiązanie może nie zadziałać',
+      mitigation: 'Zrób szybki proof-of-concept dla niezweryfikowanych obszarów zanim wejdziesz w pełną realizację. Przygotuj alternatywne podejście techniczne dla krytycznych komponentów.'
+    },
+    deps: {
+      title:      'Opóźnienia po stronie zewnętrznych dostawców lub zespołów',
+      mitigation: 'Zmapuj wszystkie zależności zewnętrzne i przypisz im ownerów po waszej stronie. Zadbaj o SLA lub przynajmniej cotygodniowy kontakt statusowy. Zbuduj środowisko testowe niezależne od zewnętrznych systemów (mock/stub).'
+    },
+    team: {
+      title:      'Utrata kluczowych kompetencji – ryzyko odejścia lub niedostępności',
+      mitigation: 'Upewnij się że każdy krytyczny obszar znają min. 2 osoby. Dokumentuj wiedzę na bieżąco (wiki, ADR). Ustal plan onboardingu nowej osoby z wyprzedzeniem.'
+    },
+    planning: {
+      title:      'Przekroczenie harmonogramu i budżetu',
+      mitigation: 'Sprawdź harmonogram z zespołem – czy terminy są realne przy obecnym obciążeniu? Dodaj bufor min. 15% na nieprzewidziane sytuacje. Zdefiniuj jasne kryteria ukończenia każdego etapu.'
+    },
+    risk: {
+      title:      'Nieodkryte ryzyka – brak widoczności na zagrożenia projektu',
+      mitigation: 'Przeprowadź sesję identyfikacji ryzyk z całym zespołem (wystarczy 1h). Prowadź rejestr z ownerem i datą przeglądu dla każdego ryzyka. Przeglądaj go co dwa tygodnie.'
+    }
+  };
+
+  const GLOBAL_RISK = {
+    title:      'Systemowo wysoka nieprzewidywalność – projekt wymaga dodatkowej uwagi PMO',
+    impact:     'blocks',
+    mitigation: 'Rozważ podział projektu na mniejsze etapy z osobnymi punktami decyzyjnymi (gate\'ami). Wdróż cotygodniowe spotkania statusowe z PMO. Zidentyfikuj 3 największe zagrożenia i zacznij od nich.'
+  };
+
+  function barColor(avg) {
+    if (avg >= 4.2) return '#28a745';
+    if (avg >= 3.4) return '#2980b9';
+    if (avg >= 2.5) return '#e67e22';
+    return '#e74c3c';
+  }
+
+  function calculate() {
+    const questions = document.querySelectorAll('.question[data-area]');
+
+    const areaScores = {
+      requirements: [], tech: [], deps: [],
+      team: [], planning: [], risk: []
+    };
+
+    let unanswered = 0;
+
+    questions.forEach(q => {
+      const radio = q.querySelector('input[type="radio"]:checked');
+      if (radio) {
+        areaScores[q.dataset.area].push(parseInt(radio.value));
+      } else {
+        unanswered++;
+      }
+    });
+
+    const allVals = Object.values(areaScores).flat();
+    if (allVals.length === 0) { alert('Uzupełnij co najmniej jedno pytanie.'); return; }
+
+    const avg = allVals.reduce((a, b) => a + b, 0) / allVals.length;
+
+    const areaAvg = {};
+    for (const k in areaScores) {
+      const arr = areaScores[k];
+      areaAvg[k] = arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : null;
+    }
+
+    const weakAreas     = Object.keys(areaAvg).filter(k => areaAvg[k] !== null && areaAvg[k] < 4);
+    const criticalAreas = Object.keys(areaAvg).filter(k => areaAvg[k] !== null && areaAvg[k] < 2.5);
+
+    // Level
+    let levelClass, levelLabel, levelDesc, levelBadge;
+    if (avg >= 4.2) {
+      levelClass = 'level-low';    levelBadge = '🟢';
+      levelLabel = 'Niska nieprzewidywalność';
+      levelDesc  = 'Projekt jest dobrze zdefiniowany i kontrolowany. Standardowe praktyki PM są wystarczające.';
+    } else if (avg >= 3.4) {
+      levelClass = 'level-medium'; levelBadge = '🔵';
+      levelLabel = 'Umiarkowana nieprzewidywalność';
+      levelDesc  = 'Są obszary wymagające aktywnego monitorowania. Zalecane regularne checkpointy z PMO.';
+    } else if (avg >= 2.5) {
+      levelClass = 'level-high';   levelBadge = '🟠';
+      levelLabel = 'Wysoka nieprzewidywalność';
+      levelDesc  = 'Projekt jest obarczony istotnymi ryzykami. Wymagane intensywniejsze zarządzanie i mechanizmy kontrolne.';
+    } else {
+      levelClass = 'level-vhigh';  levelBadge = '🔴';
+      levelLabel = 'Bardzo wysoka nieprzewidywalność';
+      levelDesc  = 'Projekt wymaga gruntownego przeglądu zakresu, zasobów i podejścia. Rozważ podział na mniejsze etapy z oddzielnymi gate\'ami decyzyjnymi.';
+    }
+
+    // Bars
+    const barsHtml = Object.keys(areaAvg).map(k => {
+      if (areaAvg[k] === null) return '';
+      const pct = ((areaAvg[k] - 1) / 4) * 100;
+      return `
+        <div class="bar-row">
+          <div class="bar-label">${AREA_ICONS[k]} ${AREA_LABELS[k]}</div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width:${pct.toFixed(1)}%; background:${barColor(areaAvg[k])};"></div>
+          </div>
+          <div class="bar-val">${areaAvg[k].toFixed(1)}</div>
+        </div>`;
+    }).join('');
+
+    // Risks
+    const activeRisks = weakAreas.map(k => {
+      const impact = getImpact(k, areaAvg[k], criticalAreas);
+      return { ...RISK_DATA[k], impact };
+    });
+
+    if (avg < 3.0) activeRisks.push(GLOBAL_RISK);
+
+    let riskBodyHtml;
+    if (activeRisks.length === 0) {
+      riskBodyHtml = `<div class="no-risks">✅ Brak zidentyfikowanych obszarów wysokiego ryzyka. Utrzymaj dotychczasowe praktyki.</div>`;
+    } else {
+      riskBodyHtml = `
+        <table>
+          <thead>
+            <tr>
+              <th style="width:28%">Ryzyko</th>
+              <th style="width:16%">Wpływ</th>
+              <th>Co zrobić</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${activeRisks.map(r => `
+              <tr>
+                <td><strong>${r.title}</strong></td>
+                <td><span class="impact-badge ${IMPACT_CLASS[r.impact]}">${IMPACT_LABEL[r.impact]}</span></td>
+                <td>${r.mitigation}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>`;
+    }
+
+    const warnHtml = unanswered > 0
+      ? `<div class="unanswered-warn">⚠️ Pominięto <strong>${unanswered}</strong> pytanie(a) – wynik jest szacunkowy. Im więcej odpowiedzi, tym dokładniejsza ocena.</div>`
+      : '';
+
+    const notes = document.getElementById('notes').value.trim();
+    const notesHtml = notes
+      ? `<div style="margin-top:20px; padding:14px 18px; background:#f7f8fa; border-radius:8px; border-left:4px solid #aaa; font-size:0.88rem; color:#444;">
+           <strong>💬 Dodatkowy kontekst:</strong><br>${notes.replace(/\n/g, '<br>')}
+         </div>`
+      : '';
+
+    const resultEl = document.getElementById('result');
+    resultEl.style.display = 'block';
+    resultEl.innerHTML = `
+      ${warnHtml}
+      <div class="result-header ${levelClass}">
+        <div class="badge">${levelBadge}</div>
+        <div class="label-text">
+          <h2>${levelLabel}</h2>
+          <p>${levelDesc}</p>
+        </div>
+        <div class="score-box">
+          <div class="score-num">${avg.toFixed(2)}</div>
+          <div class="score-label">/ 5.00 śr. ocena</div>
+        </div>
+      </div>
+      <div class="area-bars">
+        <h3>Oceny obszarów</h3>
+        ${barsHtml}
+      </div>
+      <div class="risk-table-wrap">
+        <h3>⚠️ Zidentyfikowane ryzyka i rekomendacje</h3>
+        ${riskBodyHtml}
+      </div>
+      ${notesHtml}`;
+
+    resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+</script>
+
+</body>
+</html>
