@@ -7,11 +7,7 @@ na początku realizacji lub podczas kontroli PMO.
 
 ## Jak korzystać
 
-### 1. Otwórz plik
-Otwórz plik `index.html` w dowolnej przeglądarce (Chrome, Edge, Firefox).
-Nie wymaga instalacji, serwera ani połączenia z internetem.
-
-### 2. Wypełnij formularz
+### 1. Wypełnij formularz
 Formularz składa się z **12 pytań** pogrupowanych w 6 obszarów:
 
 | Obszar | Co oceniasz |
@@ -29,11 +25,11 @@ do ❌ (brak lub poważny problem).
 > 💡 Przy każdym pytaniu jest przycisk `?` — kliknij lub najedź kursorem
 > jeśli potrzebujesz wskazówki co dokładnie oceniać.
 
-### 3. Dodaj uwagi (opcjonalnie)
+### 2. Dodaj uwagi (opcjonalnie)
 W polu **Dodatkowe uwagi** możesz opisać specyficzny kontekst projektu
 lub źródła niepewności które nie mieszczą się w pytaniach.
 
-### 4. Kliknij „Oblicz ocenę"
+### 3. Kliknij „Oblicz ocenę"
 Narzędzie wygeneruje:
 - **Poziom nieprzewidywalności** projektu w skali 4-stopniowej
 - **Wykresy słupkowe** dla każdego z 6 obszarów
@@ -70,22 +66,6 @@ Każde zidentyfikowane ryzyko otrzymuje jeden z trzech typów wpływu:
 | Kontrola PMO | PM na prośbę PMO Directora |
 | Pojawienie się istotnej zmiany w projekcie | PM samodzielnie |
 
----
-
-## Co zrobić z wynikiem
-
-1. **Skopiuj lub zrób print screen** sekcji z wynikiem
-2. **Wklej do karty projektu** — sekcja oceny ryzyka / nieprzewidywalności
-3. **Przekaż PMO Directorowi** jako załącznik do przeglądu
 
 > ⚠️ Narzędzie nie zapisuje danych. Po zamknięciu przeglądarki wynik znika.
 > Zapisz go przed zamknięciem zakładki.
-
----
-
-## Wymagania techniczne
-
-- Dowolna nowoczesna przeglądarka (Chrome 90+, Edge 90+, Firefox 88+)
-- Brak wymagań co do systemu operacyjnego
-- Brak połączenia z internetem
-- Brak instalacji
