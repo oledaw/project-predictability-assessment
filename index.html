@@ -883,6 +883,32 @@
     resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 </script>
+<script>
+    document.querySelectorAll('.tooltip-wrap').forEach(wrap => {
+  const box = wrap.querySelector('.tooltip-box');
+
+  wrap.addEventListener('mouseenter', adjust);
+  wrap.addEventListener('focusin', adjust);
+
+  function adjust() {
+    box.style.left = '50%';
+    box.style.transform = 'translateX(-50%)';
+
+    const rect = box.getBoundingClientRect();
+
+    if (rect.left < 8) {
+      box.style.left = '0';
+      box.style.transform = 'translateX(0)';
+    }
+
+    if (rect.right > window.innerWidth - 8) {
+      box.style.left = 'auto';
+      box.style.right = '0';
+      box.style.transform = 'translateX(0)';
+    }
+  }
+});
+</script>
 
 </body>
 </html>
