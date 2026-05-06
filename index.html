@@ -854,6 +854,23 @@
            <strong>💬 Dodatkowy kontekst:</strong><br>${notes.replace(/\n/g, '<br>')}
          </div>`
       : '';
+      
+        const resultJSON = {
+  score: parseFloat(avg.toFixed(2)),
+  level: levelLabel,
+  levelClass: levelClass,
+  unanswered: unanswered,
+  areas: areaAvg,
+  weakAreas: weakAreas,
+  criticalAreas: criticalAreas,
+  risks: activeRisks.map(r => ({
+    title: r.title,
+    impact: r.impact,
+    mitigation: r.mitigation
+  })),
+  notes: notes || null,
+  timestamp: new Date().toISOString()
+};
 
     const resultEl = document.getElementById('result');
     resultEl.style.display = 'block';
@@ -878,12 +895,40 @@
         <h3>⚠️ Zidentyfikowane ryzyka i rekomendacje</h3>
         ${riskBodyHtml}
       </div>
+      <div style="margin-top:20px;">
+  <button onclick="copyJSON()" style="
+    padding:10px 14px;
+    background:#4a6fa5;
+    color:#fff;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:600;
+  ">📋 Kopiuj JSON</button>
+
+  <pre id="jsonOutput" style="
+    margin-top:12px;
+    background:#0f172a;
+    color:#e2e8f0;
+    padding:12px;
+    border-radius:8px;
+    font-size:0.78rem;
+    overflow:auto;
+  ">${JSON.stringify(resultJSON, null, 2)}</pre>
+</div>
       ${notesHtml}`;
 
     resultEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+ 
   }
+ 
 </script>
 <script>
+ function copyJSON() {
+  const text = document.getElementById('jsonOutput').innerText;
+  navigator.clipboard.writeText(text);
+  alert('JSON skopiowany do schowka');
+}
     document.querySelectorAll('.tooltip-wrap').forEach(wrap => {
   const box = wrap.querySelector('.tooltip-box');
 
