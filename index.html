@@ -476,6 +476,31 @@
           </div>
         </div>
 
+       <div class="question" data-area="team">
+          <div class="question-label-row">
+            <span class="question-label">Role i odpowiedzialności w projekcie są jasno określone</span>
+            <div class="tooltip-wrap">
+              <button type="button" class="tooltip-btn" tabindex="0">?</button>
+              <div class="tooltip-box">
+                Czy wiadomo kto podejmuje decyzje, kto odpowiada za konkretne obszary i do kogo eskalować problemy? 
+                Jeśli kilka osób „myśli że ktoś inny się tym zajmuje”, to znak ostrzegawczy.
+              </div>
+            </div>
+          </div>
+
+  <div class="question-context">
+    Każdy wie za co odpowiada, kto podejmuje decyzje i gdzie kończą się granice odpowiedzialności.
+  </div>
+
+  <div class="options">
+    <label><input type="radio" name="q13" value="5"><span>✅ Tak, mamy RACI lub jednoznaczy podział ról i odpowiedzialności</span></label>
+    <label><input type="radio" name="q13" value="4"><span>🟦 Role są podzielone, ale brakuje formalnej dokumentacji</span></label>
+    <label><input type="radio" name="q13" value="3"><span>❔ Trudno ocenić</span></label>
+    <label><input type="radio" name="q13" value="2"><span>🟧 Kilka ról się nakłada lub mamy luki odpowiedzialności</span></label>
+    <label><input type="radio" name="q13" value="1"><span>❌ Nikt nie wie za co odpowiada </span></label>
+  </div>
+</div>
+
       </div>
     </div>
 
@@ -743,6 +768,10 @@
     risk: {
       title:      'Nieodkryte ryzyka – brak widoczności na zagrożenia projektu',
       mitigation: 'Przeprowadź sesję identyfikacji ryzyk z całym zespołem (wystarczy 1h). Prowadź rejestr z ownerem i datą przeglądu. Przeglądaj go co dwa tygodnie.'
+    },
+   team: {
+      title: 'Niejasny ownership i utrata kluczowych kompetencji',
+      mitigation: 'Jasno przypisz ownerów dla każdego obszaru projektu i kluczowych decyzji. Ustal ścieżki eskalacji oraz odpowiedzialności między zespołami. Upewnij się że każdy krytyczny obszar znają min. 2 osoby i dokumentuj wiedzę na bieżąco.'
     }
   };
 
