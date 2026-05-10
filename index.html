@@ -1186,7 +1186,7 @@
                     mitigation: r.mitigation
                 })),
                 notes: notes || null,
-                timestamp: new Date().toISOString()
+                date: new Date().toISOString().split('T')[0]
             };
 
             const resultEl = document.getElementById('result');
